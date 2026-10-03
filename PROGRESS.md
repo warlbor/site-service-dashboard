@@ -58,21 +58,18 @@
 
 ## ⏳ Backlog
 
-### 5. Interactions & Polish — core items DONE
+### 5. Interactions & Polish — ALL DONE
 - [x] Period toggles swap real datasets (Daily/Weekly/Monthly/Yearly) — tickets table + invoice chart
 - [x] Chart/table segmented icons swap views (horizontal bar chart ↔ table)
 - [x] Domain pages for Facility / GA / IT / Safety / Assets & Inventory / Reports & Analytics
-  - Each: tagline + 3 KPIs + category breakdown table + invoice chart + promo
-  - Verified live: nav switching, KPI values per page, no console errors
-- [x] Build passes, all work committed
-- [ ] Mobile nav (hamburger) — optional polish
-- [ ] Search overlay, Refresh loading state, row "⋯" dropdowns — optional polish
-- [ ] Persist theme preference (localStorage) — optional polish
-
-### 6. Data & Pages
-- [x] All 7 nav destinations render real content (Dashboard + 6 domain pages)
-- [ ] Mock API layer (`fetch` + JSON) so real data can drop in later
-- [ ] Persist theme preference (localStorage)
+- [x] Mobile hamburger menu (≤720px) — opens overlay, navigates + closes, aria-expanded
+- [x] Search overlay — live filtering, Esc/backdrop/✕ to close, jumps to page (verified: "repo" → Reports & Analytics)
+- [x] Refresh button — spinner + disabled state for 1.2s
+- [x] Row "⋯" dropdowns — View suppliers / Open tickets / Export CSV
+- [x] Theme persisted to localStorage (`ssd-theme`) — verified saving 'dark'
+- [x] README.md for the repo
+- [x] Build passes, responsive audit 8/8, all verified live in browser
+- [ ] Optional future: toast notifications, URL routing (history API), mock API layer
 
 ### 7. Release — DONE
 - [x] GitHub repo created: https://github.com/warlbor/site-service-dashboard (public, `main` branch)
