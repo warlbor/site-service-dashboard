@@ -118,13 +118,13 @@ const PADL = 44
 const PADB = 26
 const YMAX = 300
 
-export function InvoiceBars({ months, values, annotation }) {
+export function InvoiceBars({ labels, values, annotation }) {
   const iw = CW - PADL - 10
   const ih = CH - PADB - 12
-  const bw = iw / months.length
+  const bw = iw / labels.length
   const y = (v) => 12 + ih - (v / YMAX) * ih
 
-  const annIdx = months.indexOf(annotation.month)
+  const annIdx = annotation.index ?? labels.indexOf(annotation.month)
   const ax = PADL + annIdx * bw + bw / 2
 
   // zig-zag annotation line between bar tops
@@ -169,7 +169,7 @@ export function InvoiceBars({ months, values, annotation }) {
       </text>
 
       {/* x labels */}
-      {months.map((m, i) => (
+      {labels.map((m, i) => (
         <text key={m} x={PADL + i * bw + bw / 2} y={CH - 8} textAnchor="middle" fontSize="9" fill="#9b979a">
           {m}
         </text>

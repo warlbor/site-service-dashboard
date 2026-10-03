@@ -8,10 +8,11 @@ import {
   MAP_TIPS,
   KEY_SITES,
   TABLE_PERIODS,
-  CATEGORY_ROWS,
+  TICKETS_BY_PERIOD,
   INVOICE_PERIODS,
-  INVOICE_BARS,
+  INVOICE_BY_PERIOD,
   PROMO,
+  DOMAIN_PAGES,
 } from './data.js'
 import './dashboard.css'
 import './promo.css'
@@ -19,8 +20,7 @@ import './responsive.css'
 
 /* ---------- Top navigation ---------- */
 
-function TopNav({ dark, setDark }) {
-  const [active, setActive] = useState('Dashboard')
+function TopNav({ dark, setDark, active, onNavigate }) {
   return (
     <nav className="topnav">
       <div className="brand-mark"><BrandGlyph size={28} /></div>
@@ -31,7 +31,7 @@ function TopNav({ dark, setDark }) {
             role="tab"
             aria-selected={active === item}
             className={`nav-link${active === item ? ' active' : ''}`}
-            onClick={() => setActive(item)}
+            onClick={() => onNavigate(item)}
           >
             {item}
           </button>
@@ -74,11 +74,11 @@ function SideRail() {
 
 /* ---------- Title row ---------- */
 
-function TitleRow() {
+function TitleRow({ title }) {
   return (
     <div className="title-row">
       <button className="search-btn" aria-label="Search">{Icon.search(18)}</button>
-      <h1>Site Service Dashboard</h1>
+      <h1>{title}</h1>
       <div className="title-actions">
         <button className="refresh-pill">{Icon.refresh(13)} Refresh</button>
         <button className="icon-btn" aria-label="Download report">{Icon.download()}</button>
@@ -167,21 +167,23 @@ function Gauge({ hue, pos }) {
   )
 }
 
-function CategoryPanel() {
+function CategoryPanel({ rowsSource }) {
   const [period, setPeriod] = useState('Monthly')
-  const [mode, setMode] = useState('chart')
+  const [mode, setMode] = useState('table')
   const [sortKey, setSortKey] = useState(null)
   const [sortDir, setSortDir] = useState(1)
 
+  const baseRows = rowsSource ?? TICKETS_BY_PERIOD[period]
+
   const rows = useMemo(() => {
-    if (!sortKey) return CATEGORY_ROWS
-    return [...CATEGORY_ROWS].sort((a, b) => {
+    if (!sortKey) return baseRows
+    return [...baseRows].sort((a, b) => {
       const av = a[sortKey]
       const bv = b[sortKey]
       if (typeof av === 'number') return (av - bv) * sortDir
       return String(av).localeCompare(String(bv)) * sortDir
     })
-  }, [sortKey, sortDir])
+  }, [sortKey, sortDir, baseRows])
 
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir((d) => -d)
@@ -209,48 +211,74 @@ function CategoryPanel() {
           ))}
         </div>
       </div>
-      <div className="table-scroll">
-        <table className="cat-table">
-          <thead>
-          <tr>
-            {cols.map(([key, label]) => (
-              <th key={key} onClick={() => toggleSort(key)}>
-                {label}
-                <span className="caret">{sortKey === key ? (sortDir === 1 ? '▲' : '▼') : '⇅'}</span>
-              </th>
-            ))}
-            <th aria-label="actions" />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.category}>
-              <td>{r.category}</td>
-              <td className="td-num">{r.spend}</td>
-              <td className="td-num">{r.transactions}</td>
-              <td className="td-num">
-                {r.suppliers} <span className="td-pct">{r.pct}</span>
-              </td>
-              <td>
-                <div className="cycle">
-                  <Gauge hue={r.gauge.hue} pos={r.gauge.pos} />
-                  <span className="cycle-days">{r.days}</span>
-                </div>
-              </td>
-              <td>
-                <button className="row-menu" aria-label={`More actions for ${r.category}`}>{Icon.dots()}</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-        </table>
-      </div>
+      {mode === 'table' ? (
+        <div className="table-scroll">
+          <table className="cat-table">
+            <thead>
+              <tr>
+                {cols.map(([key, label]) => (
+                  <th key={key} onClick={() => toggleSort(key)}>
+                    {label}
+                    <span className="caret">{sortKey === key ? (sortDir === 1 ? '▲' : '▼') : '⇅'}</span>
+                  </th>
+                ))}
+                <th aria-label="actions" />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.category}>
+                  <td>{r.category}</td>
+                  <td className="td-num">{r.spend}</td>
+                  <td className="td-num">{r.transactions}</td>
+                  <td className="td-num">
+                    {r.suppliers} <span className="td-pct">{r.pct}</span>
+                  </td>
+                  <td>
+                    <div className="cycle">
+                      <Gauge hue={r.gauge.hue} pos={r.gauge.pos} />
+                      <span className="cycle-days">{r.days}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button className="row-menu" aria-label={`More actions for ${r.category}`}>{Icon.dots()}</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <CategoryChart rows={baseRows} />
+      )}
+    </div>
+  )
+}
+
+// Simple horizontal bar visualization used when the panel is in chart mode.
+function CategoryChart({ rows }) {
+  const max = Math.max(...rows.map((r) => r.transactions))
+  return (
+    <div className="cat-chart">
+      {rows.map((r) => (
+        <div key={r.category} className="cat-chart-row">
+          <span className="cat-chart-label">{r.category}</span>
+          <div className="cat-chart-track">
+            <div
+              className="cat-chart-fill"
+              style={{ width: `${(r.transactions / max) * 100}%` }}
+            />
+          </div>
+          <span className="cat-chart-num">{r.transactions}</span>
+        </div>
+      ))}
     </div>
   )
 }
 
 function InvoicePanel() {
   const [period, setPeriod] = useState('Yearly')
+  const data = INVOICE_BY_PERIOD[period]
   return (
     <div className="tile">
       <div className="panel-head">
@@ -262,7 +290,7 @@ function InvoicePanel() {
         </div>
       </div>
       <div className="chart-wrap">
-        <InvoiceBars {...INVOICE_BARS} />
+        <InvoiceBars {...data} />
       </div>
     </div>
   )
@@ -277,35 +305,80 @@ function Promo() {
   )
 }
 
+/* ---------- Domain pages (Facility / GA / IT / Safety / ...) ---------- */
+
+function DomainPage({ name }) {
+  const page = DOMAIN_PAGES[name]
+  if (!page) return null
+  return (
+    <div className="domain-page">
+      <p className="domain-tagline">{page.tagline}</p>
+      <section className="band1 domain-band">
+        <div className="tile">
+          <div className="tile-title">{name} Overview</div>
+          <div className="overview-kpis">
+            {page.kpis.map((k) => (
+              <div className="kpi" key={k.label}>
+                <div className="kpi-value">
+                  {k.value}
+                  <span className={`kpi-delta ${k.dir}`}>{k.delta}</span>
+                </div>
+                <div className="kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="band2">
+        <CategoryPanel rowsSource={page.rows} />
+        <div>
+          <InvoicePanel />
+          <Promo />
+        </div>
+      </section>
+    </div>
+  )
+}
+
 /* ---------- App ---------- */
 
 export default function App() {
   const [dark, setDark] = useState(false)
+  const [page, setPage] = useState('Dashboard')
   if (typeof document !== 'undefined') document.body.classList.toggle('dark', dark)
+
+  const isDashboard = page === 'Dashboard'
+  const title = isDashboard ? 'Site Service Dashboard' : page
 
   return (
     <div className="app-shell">
       <div className="app-card">
-        <TopNav dark={dark} setDark={setDark} />
-        <TitleRow />
+        <TopNav dark={dark} setDark={setDark} active={page} onNavigate={setPage} />
+        <TitleRow title={title} />
         <div className="dash-grid">
           <SideRail />
           <main className="main-col">
-            <section className="band1">
-              <div className="kpi-stack">
-                <OverviewTile />
-                {SPARK_TILES.map((t) => <SparkTile key={t.id} tile={t} />)}
-              </div>
-              <MapPanel />
-              <KeySitesTile />
-            </section>
-            <section className="band2">
-              <CategoryPanel />
-              <div>
-                <InvoicePanel />
-                <Promo />
-              </div>
-            </section>
+            {isDashboard ? (
+              <>
+                <section className="band1">
+                  <div className="kpi-stack">
+                    <OverviewTile />
+                    {SPARK_TILES.map((t) => <SparkTile key={t.id} tile={t} />)}
+                  </div>
+                  <MapPanel />
+                  <KeySitesTile />
+                </section>
+                <section className="band2">
+                  <CategoryPanel />
+                  <div>
+                    <InvoicePanel />
+                    <Promo />
+                  </div>
+                </section>
+              </>
+            ) : (
+              <DomainPage name={page} />
+            )}
           </main>
         </div>
       </div>

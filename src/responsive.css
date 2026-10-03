@@ -25,6 +25,9 @@
 }
 
 @media (max-width: 720px) {
+  .domain-tagline { margin-left: 0; }
+  .cat-chart-label { width: 96px; font-size: 11px; }
+  .cat-chart-num { width: 36px; }
   .app-shell { padding: 10px; }
   .app-card { padding: 14px; border-radius: 20px; }
   .dash-grid { grid-template-columns: 1fr; }

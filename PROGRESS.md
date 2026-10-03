@@ -58,16 +58,19 @@
 
 ## ⏳ Backlog
 
-### 5. Interactions & Polish
-- [ ] Mobile nav (hamburger or horizontal scroll) — nav links hide below 720px; icon rail now scrolls horizontally instead
-- [ ] Search button opens functional search overlay
-- [ ] Refresh button triggers loading state / re-animate charts
-- [ ] Row "⋯" menus open dropdown (view suppliers, open tickets)
-- [ ] Table: chart/table segmented icons actually swap views
-- [ ] Period toggles (Daily/Weekly/Monthly/Yearly) swap datasets
+### 5. Interactions & Polish — core items DONE
+- [x] Period toggles swap real datasets (Daily/Weekly/Monthly/Yearly) — tickets table + invoice chart
+- [x] Chart/table segmented icons swap views (horizontal bar chart ↔ table)
+- [x] Domain pages for Facility / GA / IT / Safety / Assets & Inventory / Reports & Analytics
+  - Each: tagline + 3 KPIs + category breakdown table + invoice chart + promo
+  - Verified live: nav switching, KPI values per page, no console errors
+- [x] Build passes, all work committed
+- [ ] Mobile nav (hamburger) — optional polish
+- [ ] Search overlay, Refresh loading state, row "⋯" dropdowns — optional polish
+- [ ] Persist theme preference (localStorage) — optional polish
 
 ### 6. Data & Pages
-- [ ] Router: pages for Facility / GA / IT / Safety / Assets & Inventory / Reports & Analytics
+- [x] All 7 nav destinations render real content (Dashboard + 6 domain pages)
 - [ ] Mock API layer (`fetch` + JSON) so real data can drop in later
 - [ ] Persist theme preference (localStorage)
 
