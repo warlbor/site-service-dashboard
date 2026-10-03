@@ -59,6 +59,10 @@ src/
 └── responsive.css   # breakpoints
 ```
 
+## Agent Thinking Discipline
+
+This project's AI agent follows the [thinking-quality-exam](https://github.com/Arshad-Kamal/thinking-quality-exam) 9-rule discipline (research-backed: fewer wasted thinking tokens, better resistance to wrongful reverts). See [`AGENT_THINKING_RULES.md`](AGENT_THINKING_RULES.md) and [`THINKING_DISCIPLINE.md`](THINKING_DISCIPLINE.md).
+
 ## Progress
 
 See [`PROGRESS.md`](PROGRESS.md) for the full step-by-step build log.
