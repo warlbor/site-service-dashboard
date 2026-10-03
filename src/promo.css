@@ -1,0 +1,72 @@
+/* ============ Promo banner ============ */
+
+.promo {
+  margin-top: 14px;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+  background:
+    radial-gradient(420px 120px at 30% 50%, rgba(244, 80, 92, 0.75), transparent 65%),
+    radial-gradient(500px 140px at 75% 60%, rgba(150, 35, 45, 0.6), transparent 70%),
+    linear-gradient(160deg, #2c292b, #35302f);
+  border: 1px solid var(--tile-edge);
+}
+
+.promo .get-pro {
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.promo .get-pro:hover { transform: scale(1.04); }
+
+/* ============ Dark mode ============ */
+
+body.dark {
+  --card: #232122;
+  --ink: #f2f0ee;
+  --ink-2: #c9c6c4;
+  --ink-3: #8a8a8a;
+  --card-edge: rgba(255, 255, 255, 0.07);
+}
+
+body.dark .nav-link { color: var(--ink-2); }
+body.dark .nav-link:hover { background: rgba(255, 255, 255, 0.06); color: var(--ink); }
+body.dark .theme-pill, body.dark .bell-btn, body.dark .rail-btn { background: #333032; }
+body.dark .theme-btn.on { background: #4a4548; color: #fff; }
+body.dark .app-card { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); }
+body.dark .map-tip { background: #2e2b2d; color: var(--ink-2); }
+body.dark .map-tip b { color: var(--ink); }
+body.dark .rail-btn:hover { background: #3d393b; }
+
+/* ============ Icons (inline svg sizing) ============ */
+
+.ic { display: block; }
+
+/* ============ Responsive ============ */
+
+@media (max-width: 1100px) {
+  .band1 { grid-template-columns: 1fr 1fr; }
+  .map-panel { grid-column: 1 / -1; order: -1; min-height: 240px; }
+  .band2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .band1 { grid-template-columns: 1fr; }
+  .title-row h1 { font-size: 24px; }
+  .app-card { padding: 16px; }
+}
+
+/* Focus visibility */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
