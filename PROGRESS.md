@@ -74,14 +74,24 @@
 - [ ] Mock API layer (`fetch` + JSON) so real data can drop in later
 - [ ] Persist theme preference (localStorage)
 
-### 7. Release
-- [ ] Deploy (Vercel / Netlify / GitHub Pages)
-- [ ] Push to GitHub remote
-- [ ] README with setup + screenshots
+### 7. Release — DONE
+- [x] GitHub repo created: https://github.com/warlbor/site-service-dashboard (public, `main` branch)
+- [x] GitHub CLI installed at `~/.local/gh-cli` (v2.67.0), authenticated as **warlbor**
+- [x] Deploy pipeline: `npm run deploy` — builds with Pages base path, publishes `dist/` to `gh-pages`
+- [x] GitHub Pages enabled (source: `gh-pages` branch, root)
+- [x] **LIVE: https://warlbor.github.io/site-service-dashboard/** (verified HTTP 200)
+- [ ] Optional: custom domain, README with screenshots, badge
 
 ---
 
-## How to Run
+## Deploy / Update the Live Site
+
+```bash
+cd ~/Projects/site-service-dashboard
+npm run deploy     # rebuild + push dist/ to gh-pages (live in ~1 min)
+```
+
+## How to Run (local)
 
 ```bash
 cd ~/Projects/site-service-dashboard
