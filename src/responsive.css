@@ -1,0 +1,51 @@
+/* ============ Responsive hardening ============ */
+
+/* Table: horizontal scroll on narrow screens instead of page overflow */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll .cat-table { min-width: 640px; }
+
+/* Segmented controls: wrap gracefully on small tiles */
+.seg-group { flex-wrap: wrap; max-width: 100%; }
+
+/* Map: never collapse to zero height on mobile */
+.map-panel { min-height: 240px; }
+
+/* KPI tiles: allow the 3-stat row to wrap instead of squishing */
+.overview-kpis { flex-wrap: wrap; row-gap: 12px; }
+.overview-kpis .kpi { min-width: 96px; }
+
+/* Sparkline value rows keep numbers from clipping */
+.spark-value, .kpi-value { overflow-wrap: anywhere; }
+
+@media (max-width: 1100px) {
+  .band1 { grid-template-columns: 1fr 1fr; }
+  .map-panel { grid-column: 1 / -1; order: -1; min-height: 240px; }
+  .band2 { grid-template-columns: 1fr; }
+  .dash-grid { grid-template-columns: 48px 1fr; }
+}
+
+@media (max-width: 720px) {
+  .app-shell { padding: 10px; }
+  .app-card { padding: 14px; border-radius: 20px; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .side-rail {
+    flex-direction: row;
+    order: -1;
+    padding: 0 0 10px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  .rail-spacer { display: none; }
+  .rail-btn { flex-shrink: 0; }
+  .title-row { flex-wrap: wrap; gap: 10px; }
+  .title-row h1 { font-size: 22px; flex-basis: 100%; }
+  .band1 { grid-template-columns: 1fr; }
+  .promo { flex-direction: column; align-items: flex-start; text-align: left; }
+  .nav-right { margin-left: auto; }
+}
+
+@media (max-width: 420px) {
+  .title-actions { width: 100%; justify-content: flex-end; }
+  .overview-kpis .kpi .kpi-value { font-size: 19px; }
+  .spark-value { font-size: 22px; }
+}

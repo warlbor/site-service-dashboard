@@ -15,6 +15,7 @@ import {
 } from './data.js'
 import './dashboard.css'
 import './promo.css'
+import './responsive.css'
 
 /* ---------- Top navigation ---------- */
 
@@ -208,8 +209,9 @@ function CategoryPanel() {
           ))}
         </div>
       </div>
-      <table className="cat-table">
-        <thead>
+      <div className="table-scroll">
+        <table className="cat-table">
+          <thead>
           <tr>
             {cols.map(([key, label]) => (
               <th key={key} onClick={() => toggleSort(key)}>
@@ -241,7 +243,8 @@ function CategoryPanel() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   )
 }
