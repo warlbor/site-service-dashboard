@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon, BrandGlyph } from './icons.jsx'
 import { Sparkline, EuropeMap, SiteBars, InvoiceBars } from './charts.jsx'
 import {
@@ -21,6 +21,13 @@ import './responsive.css'
 /* ---------- Top navigation ---------- */
 
 function TopNav({ dark, setDark, active, onNavigate }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  const go = (item) => {
+    onNavigate(item)
+    setMenuOpen(false)
+  }
+
   return (
     <nav className="topnav">
       <div className="brand-mark"><BrandGlyph size={28} /></div>
@@ -31,13 +38,21 @@ function TopNav({ dark, setDark, active, onNavigate }) {
             role="tab"
             aria-selected={active === item}
             className={`nav-link${active === item ? ' active' : ''}`}
-            onClick={() => onNavigate(item)}
+            onClick={() => go(item)}
           >
             {item}
           </button>
         ))}
       </div>
       <div className="nav-right">
+        <button
+          className="hamburger"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? Icon.close(16) : Icon.menu(16)}
+        </button>
         <div className="theme-pill" role="group" aria-label="Theme">
           <button className={`theme-btn${!dark ? ' on' : ''}`} aria-label="Light mode" onClick={() => setDark(false)}>
             {Icon.sun(13)}
@@ -52,6 +67,20 @@ function TopNav({ dark, setDark, active, onNavigate }) {
         </button>
         <div className="avatar" title="Gian Aprima">GA</div>
       </div>
+      {menuOpen && (
+        <div className="mobile-menu" role="menu">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item}
+              role="menuitem"
+              className={`mobile-menu-link${active === item ? ' active' : ''}`}
+              onClick={() => go(item)}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      )}
     </nav>
   )
 }
@@ -74,16 +103,56 @@ function SideRail() {
 
 /* ---------- Title row ---------- */
 
-function TitleRow({ title }) {
+function TitleRow({ title, onNavigate, onRefresh, refreshing }) {
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+
+  const results = query.trim()
+    ? NAV_ITEMS.filter((item) => item.toLowerCase().includes(query.toLowerCase()))
+    : NAV_ITEMS
+
   return (
     <div className="title-row">
-      <button className="search-btn" aria-label="Search">{Icon.search(18)}</button>
+      <button className="search-btn" aria-label="Search" onClick={() => setSearchOpen(true)}>{Icon.search(18)}</button>
       <h1>{title}</h1>
       <div className="title-actions">
-        <button className="refresh-pill">{Icon.refresh(13)} Refresh</button>
+        <button className={`refresh-pill${refreshing ? ' spinning' : ''}`} onClick={onRefresh} disabled={refreshing}>
+          {Icon.refresh(13)} {refreshing ? 'Refreshing…' : 'Refresh'}
+        </button>
         <button className="icon-btn" aria-label="Download report">{Icon.download()}</button>
         <button className="icon-btn" aria-label="Share dashboard">{Icon.shareArrow()}</button>
       </div>
+      {searchOpen && (
+        <div className="search-overlay" onClick={() => setSearchOpen(false)}>
+          <div className="search-box" onClick={(e) => e.stopPropagation()}>
+            <div className="search-input-row">
+              {Icon.search(16)}
+              <input
+                autoFocus
+                placeholder="Search pages…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && setSearchOpen(false)}
+              />
+              <button className="search-close" aria-label="Close search" onClick={() => setSearchOpen(false)}>
+                {Icon.close(14)}
+              </button>
+            </div>
+            <div className="search-results">
+              {results.length === 0 && <div className="search-empty">No matches for “{query}”</div>}
+              {results.map((item) => (
+                <button
+                  key={item}
+                  className="search-result"
+                  onClick={() => { onNavigate(item); setSearchOpen(false) }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -158,6 +227,28 @@ function KeySitesTile() {
 /* ---------- Band 2: table + chart ---------- */
 
 const HUE_COLORS = { red: '#e05252', amber: '#e0a352', green: '#35c27a' }
+
+// "⋯" action menu for a table row
+function RowMenu({ category }) {
+  const [open, setOpen] = useState(false)
+  const actions = ['View suppliers', 'Open tickets', 'Export CSV']
+  return (
+    <div className="row-menu-wrap">
+      <button className="row-menu" aria-label={`More actions for ${category}`} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {Icon.dots()}
+      </button>
+      {open && (
+        <div className="row-menu-pop" role="menu">
+          {actions.map((a) => (
+            <button key={a} role="menuitem" className="row-menu-item" onClick={() => setOpen(false)}>
+              {a}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Gauge({ hue, pos }) {
   return (
@@ -241,7 +332,7 @@ function CategoryPanel({ rowsSource }) {
                     </div>
                   </td>
                   <td>
-                    <button className="row-menu" aria-label={`More actions for ${r.category}`}>{Icon.dots()}</button>
+                    <RowMenu category={r.category} />
                   </td>
                 </tr>
               ))}
@@ -343,9 +434,22 @@ function DomainPage({ name }) {
 /* ---------- App ---------- */
 
 export default function App() {
-  const [dark, setDark] = useState(false)
   const [page, setPage] = useState('Dashboard')
-  if (typeof document !== 'undefined') document.body.classList.toggle('dark', dark)
+  const [refreshing, setRefreshing] = useState(false)
+  const [dark, setDark] = useState(() => {
+    try { return localStorage.getItem('ssd-theme') === 'dark' } catch { return false }
+  })
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', dark)
+    try { localStorage.setItem('ssd-theme', dark ? 'dark' : 'light') } catch { /* private mode */ }
+  }, [dark])
+
+  const refresh = () => {
+    if (refreshing) return
+    setRefreshing(true)
+    setTimeout(() => setRefreshing(false), 1200)
+  }
 
   const isDashboard = page === 'Dashboard'
   const title = isDashboard ? 'Site Service Dashboard' : page
@@ -354,7 +458,7 @@ export default function App() {
     <div className="app-shell">
       <div className="app-card">
         <TopNav dark={dark} setDark={setDark} active={page} onNavigate={setPage} />
-        <TitleRow title={title} />
+        <TitleRow title={title} onNavigate={setPage} onRefresh={refresh} refreshing={refreshing} />
         <div className="dash-grid">
           <SideRail />
           <main className="main-col">

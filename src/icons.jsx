@@ -62,6 +62,12 @@ export const Icon = {
   table: (s = 12) => (
     <svg {...P} width={s} height={s}><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18M9 10v10" /></svg>
   ),
+  menu: (s = 16) => (
+    <svg {...P} width={s} height={s}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+  ),
+  close: (s = 14) => (
+    <svg {...P} width={s} height={s}><path d="M6 6l12 12M18 6L6 18" /></svg>
+  ),
 }
 
 // Brand glyph: three stacked curved slats (abstract "S")

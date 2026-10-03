@@ -10,7 +10,7 @@ const css = files
 // presence = bad
 const badPatterns = [
   { name: 'no fixed wide grid columns (>=400px)', re: /grid-template-columns:[^;]*\b[4-9]\d\dpx/ },
-  { name: 'no hard fixed heights >=300px on layout', re: /\bheight:\s*[3-9]\d{2}px/ },
+  { name: 'no hard fixed heights >=300px on layout (max-height allowed)', re: /[^-]height:\s*[3-9]\d{2}px/ },
   { name: 'no fixed widths >=500px on components (min/max-width allowed)', re: /[^-]width:\s*[5-9]\d{2}px/ },
 ]
 
