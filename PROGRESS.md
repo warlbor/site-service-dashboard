@@ -69,7 +69,12 @@
 - [x] Theme persisted to localStorage (`ssd-theme`) — verified saving 'dark'
 - [x] README.md for the repo
 - [x] Build passes, responsive audit 8/8, all verified live in browser
-- [ ] Optional future: toast notifications, URL routing (history API), mock API layer
+
+### 6. Data & Routing — DONE
+- [x] Mock API layer (`src/api.js`) — `fetchTickets` / `fetchInvoice` / `fetchDomainPage` with simulated latency; components consume via `useAsync` hook + shimmer `Skeleton` + `ErrorNote` retry UI. To go real: swap function bodies for `fetch('/api/...')` — components unchanged.
+- [x] URL routing (`src/router.js`) — hash-based (`#/dashboard`, `#/safety`, `#/ga`, …): deep links, back/forward buttons, shareable URLs. Verified: nav click updates hash, `history.back()` returns to previous page, direct `#/safety` load renders Safety.
+- [x] Verified live: Weekly toggle fetched new dataset through API ($381,760 · 238 transactions)
+- [ ] Optional future: toast notifications
 
 ### 7. Release — DONE
 - [x] GitHub repo created: https://github.com/warlbor/site-service-dashboard (public, `main` branch)
@@ -101,6 +106,9 @@ npm run build    # production build to dist/
 | File | Purpose |
 |---|---|
 | `src/data.js` | All copy/figures — edit numbers here |
+| `src/api.js` | Mock API — swap bodies for real `fetch` calls |
+| `src/router.js` | Hash router (`#/safety`, `#/ga`, …) |
+| `src/useAsync.js` + `src/async.jsx` | Async state hook + Skeleton/Error UI |
 | `src/App.jsx` | All layout components |
 | `src/charts.jsx` | Sparkline, map, bars (pure SVG) |
 | `src/icons.jsx` | Icon set + brand glyph |

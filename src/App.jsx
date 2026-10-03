@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Icon, BrandGlyph } from './icons.jsx'
 import { Sparkline, EuropeMap, SiteBars, InvoiceBars } from './charts.jsx'
+import { useRoute } from './router.js'
+import { useAsync } from './useAsync.js'
+import { Skeleton, ErrorNote } from './async.jsx'
+import { fetchTickets, fetchInvoice } from './api.js'
 import {
   NAV_ITEMS,
   OVERVIEW_KPIS,
@@ -264,17 +268,23 @@ function CategoryPanel({ rowsSource }) {
   const [sortKey, setSortKey] = useState(null)
   const [sortDir, setSortDir] = useState(1)
 
-  const baseRows = rowsSource ?? TICKETS_BY_PERIOD[period]
+  // Static rows passed in (domain pages) skip the API; the dashboard fetches.
+  const remote = useAsync(
+    useCallback(() => fetchTickets(period), [period]),
+    [period],
+  )
+  const liveRows = rowsSource ?? remote.data ?? TICKETS_BY_PERIOD[period]
+  const loading = !rowsSource && remote.loading
 
   const rows = useMemo(() => {
-    if (!sortKey) return baseRows
-    return [...baseRows].sort((a, b) => {
+    if (!sortKey) return liveRows
+    return [...liveRows].sort((a, b) => {
       const av = a[sortKey]
       const bv = b[sortKey]
       if (typeof av === 'number') return (av - bv) * sortDir
       return String(av).localeCompare(String(bv)) * sortDir
     })
-  }, [sortKey, sortDir, baseRows])
+  }, [sortKey, sortDir, liveRows])
 
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir((d) => -d)
@@ -302,7 +312,11 @@ function CategoryPanel({ rowsSource }) {
           ))}
         </div>
       </div>
-      {mode === 'table' ? (
+      {loading ? (
+        <Skeleton rows={5} />
+      ) : remote.error && !rowsSource ? (
+        <ErrorNote error={remote.error} onRetry={remote.retry} />
+      ) : mode === 'table' ? (
         <div className="table-scroll">
           <table className="cat-table">
             <thead>
@@ -369,7 +383,11 @@ function CategoryChart({ rows }) {
 
 function InvoicePanel() {
   const [period, setPeriod] = useState('Yearly')
-  const data = INVOICE_BY_PERIOD[period]
+  const remote = useAsync(
+    useCallback(() => fetchInvoice(period), [period]),
+    [period],
+  )
+  const data = remote.data ?? INVOICE_BY_PERIOD[period]
   return (
     <div className="tile">
       <div className="panel-head">
@@ -380,9 +398,15 @@ function InvoicePanel() {
           ))}
         </div>
       </div>
-      <div className="chart-wrap">
-        <InvoiceBars {...data} />
-      </div>
+      {remote.loading ? (
+        <Skeleton rows={4} />
+      ) : remote.error ? (
+        <ErrorNote error={remote.error} onRetry={remote.retry} />
+      ) : (
+        <div className="chart-wrap">
+          <InvoiceBars {...data} />
+        </div>
+      )}
     </div>
   )
 }
@@ -434,7 +458,7 @@ function DomainPage({ name }) {
 /* ---------- App ---------- */
 
 export default function App() {
-  const [page, setPage] = useState('Dashboard')
+  const { page, navigate } = useRoute()
   const [refreshing, setRefreshing] = useState(false)
   const [dark, setDark] = useState(() => {
     try { return localStorage.getItem('ssd-theme') === 'dark' } catch { return false }
@@ -457,8 +481,8 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-card">
-        <TopNav dark={dark} setDark={setDark} active={page} onNavigate={setPage} />
-        <TitleRow title={title} onNavigate={setPage} onRefresh={refresh} refreshing={refreshing} />
+        <TopNav dark={dark} setDark={setDark} active={page} onNavigate={navigate} />
+        <TitleRow title={title} onNavigate={navigate} onRefresh={refresh} refreshing={refreshing} />
         <div className="dash-grid">
           <SideRail />
           <main className="main-col">
