@@ -91,14 +91,13 @@ function TopNav({ dark, setDark, active, onNavigate }) {
 
 /* ---------- Side rail ---------- */
 
-function SideRail() {
+function SideRail({ onNavigate }) {
   return (
     <aside className="side-rail">
-      <button className="rail-btn" aria-label="Documents">{Icon.folder()}</button>
-      <button className="rail-btn" aria-label="Apps">{Icon.grid()}</button>
-      <button className="rail-btn" aria-label="Ticket routing">{Icon.share()}</button>
-      <button className="rail-btn" aria-label="Helpdesk">{Icon.headset()}</button>
-      <button className="rail-btn" aria-label="Settings">{Icon.gear()}</button>
+      <button className="rail-btn" aria-label="New work order" title="New work order">{Icon.wrench()}</button>
+      <button className="rail-btn" aria-label="Assets & Inventory" title="Assets & Inventory" onClick={() => onNavigate('Assets & Inventory')}>{Icon.box()}</button>
+      <button className="rail-btn" aria-label="Reports & Analytics" title="Reports & Analytics" onClick={() => onNavigate('Reports & Analytics')}>{Icon.report()}</button>
+      <button className="rail-btn" aria-label="Settings" title="Settings">{Icon.gear()}</button>
       <div className="rail-spacer" />
       <button className="rail-btn exit" aria-label="Log out">{Icon.logout()}</button>
     </aside>
@@ -484,7 +483,7 @@ export default function App() {
         <TopNav dark={dark} setDark={setDark} active={page} onNavigate={navigate} />
         <TitleRow title={title} onNavigate={navigate} onRefresh={refresh} refreshing={refreshing} />
         <div className="dash-grid">
-          <SideRail />
+          <SideRail onNavigate={navigate} />
           <main className="main-col">
             {isDashboard ? (
               <>
