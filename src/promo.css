@@ -370,7 +370,7 @@ body.dark .todo-del:hover { background: rgba(224, 82, 82, 0.2); }
 
 .error-retry:hover { background: rgba(224, 82, 82, 0.4); }
 
-/* ============ Promo banner ============ */
+/* ============ Work-order summary banner ============ */
 
 .promo {
   margin-top: 14px;
@@ -390,7 +390,7 @@ body.dark .todo-del:hover { background: rgba(224, 82, 82, 0.2); }
   border: 1px solid var(--tile-edge);
 }
 
-.promo .get-pro {
+.promo .promo-cta {
   background: #fff;
   color: var(--ink);
   border-radius: 999px;
@@ -400,7 +400,7 @@ body.dark .todo-del:hover { background: rgba(224, 82, 82, 0.2); }
   transition: transform 0.15s ease;
 }
 
-.promo .get-pro:hover { transform: scale(1.04); }
+.promo .promo-cta:hover { transform: scale(1.04); }
 
 /* ============ Dark mode ============ */
 

@@ -27,7 +27,7 @@
 - [x] Left icon rail — now Site Services quick actions (New WO, Assets, Reports, Settings, Logout)
 - [x] Band 1: Overview KPIs · WO/TR sparkline tiles · Indonesia map with tooltips · Key Sites bars
 - [x] Band 2: Tickets by Category table (sortable) + SLA Compliance % bar chart
-- [x] Promo banner ("Get Pro")
+- [x] Work-order summary banner (replaced the irrelevant "Get Pro" upsell): live "N open work orders · M high priority" + "Open to-do list" button, refreshes when the to-do modal closes
 - [x] Light/dark mode toggle (body class + CSS variables)
 - [x] Production build passes (`npm run build` — 0 errors)
 - [x] Dev server verified live at `http://localhost:5173` (HTTP 200)

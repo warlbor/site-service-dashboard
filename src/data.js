@@ -135,11 +135,6 @@ export const SLA_BY_PERIOD = {
   },
 }
 
-export const PROMO = {
-  text: 'Upgrade to access advanced site analytics',
-  cta: 'Get Pro',
-}
-
 // ============================================================
 // Domain pages (Facility / GA / IT / Safety / Assets / Reports)
 // Each page: intro KPIs + a category breakdown table.

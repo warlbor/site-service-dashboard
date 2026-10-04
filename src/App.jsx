@@ -15,7 +15,6 @@ import {
   TICKETS_BY_PERIOD,
   SLA_PERIODS,
   SLA_BY_PERIOD,
-  PROMO,
   DOMAIN_PAGES,
 } from './data.js'
 import './dashboard.css'
@@ -563,18 +562,32 @@ function SlaPanel() {
   )
 }
 
-function Promo() {
+// Live summary of the work-order to-do list. Refetches whenever the modal
+// opens/closes (refreshKey) so the counts never go stale.
+function TodoBanner({ onOpen, refreshKey }) {
+  const remote = useAsync(() => fetchWorkOrders(), [refreshKey])
+  const open = (remote.data ?? []).filter((w) => w.status === 'open')
+  const high = open.filter((w) => w.priority === 'High').length
+
+  let text = 'Loading work orders…'
+  if (remote.error) text = 'Work orders unavailable'
+  else if (!remote.loading) {
+    text = open.length === 0
+      ? 'All clear — no open work orders'
+      : `${open.length} open work order${open.length === 1 ? '' : 's'}${high ? ` · ${high} high priority` : ''}`
+  }
+
   return (
     <div className="promo">
-      <span>{PROMO.text}</span>
-      <button className="get-pro">{PROMO.cta}</button>
+      <span>{text}</span>
+      <button className="promo-cta" onClick={onOpen}>Open to-do list</button>
     </div>
   )
 }
 
 /* ---------- Domain pages (Facility / GA / IT / Safety / ...) ---------- */
 
-function DomainPage({ name }) {
+function DomainPage({ name, onOpenTodo, todoOpen }) {
   const page = DOMAIN_PAGES[name]
   if (!page) return null
   return (
@@ -600,7 +613,7 @@ function DomainPage({ name }) {
         <CategoryPanel rowsSource={page.rows} />
         <div>
           <SlaPanel />
-          <Promo />
+          <TodoBanner onOpen={onOpenTodo} refreshKey={todoOpen} />
         </div>
       </section>
     </div>
@@ -654,12 +667,12 @@ export default function App() {
                   <CategoryPanel />
                   <div>
                     <SlaPanel />
-                    <Promo />
+                    <TodoBanner onOpen={() => setTodoOpen(true)} refreshKey={todoOpen} />
                   </div>
                 </section>
               </>
             ) : (
-              <DomainPage name={page} />
+              <DomainPage name={page} onOpenTodo={() => setTodoOpen(true)} todoOpen={todoOpen} />
             )}
           </main>
         </div>
