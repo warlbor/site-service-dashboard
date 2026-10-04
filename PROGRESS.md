@@ -21,11 +21,11 @@
 
 ### 3. Implementation
 - [x] `src/data.js` — single source of truth for every label/number (Facility/GA/IT/Safety)
-- [x] `src/icons.jsx` — 18 inline SVG icons + Quantix brand glyph
+- [x] `src/icons.jsx` — inline SVG icons + Quantix brand glyph
 - [x] `src/charts.jsx` — Sparkline, IndonesiaMap (heat glows + pins), SiteBars, SlaBars
 - [x] Top nav with active pill (coral), theme toggle, bell, avatar
-- [x] Left icon rail (Documents, Apps, Ticket Routing, Helpdesk, Settings, Logout)
-- [x] Band 1: Overview KPIs · WO/TR sparkline tiles · EU map with tooltips · Key Sites bars
+- [x] Left icon rail — now Site Services quick actions (New WO, Assets, Reports, Settings, Logout)
+- [x] Band 1: Overview KPIs · WO/TR sparkline tiles · Indonesia map with tooltips · Key Sites bars
 - [x] Band 2: Tickets by Category table (sortable) + SLA Compliance % bar chart
 - [x] Promo banner ("Get Pro")
 - [x] Light/dark mode toggle (body class + CSS variables)
@@ -66,6 +66,7 @@
 - [x] Search overlay — live filtering, Esc/backdrop/✕ to close, jumps to page (verified: "repo" → Reports & Analytics)
 - [x] Refresh button — spinner + disabled state for 1.2s
 - [x] Row "⋯" dropdowns — View SLA detail / Open tickets / Export CSV
+- [x] Side rail reworked to Site Services quick actions — New WO (wrench), Assets (box → `#/assets-inventory`), Reports (chart → `#/reports-analytics`), Settings; generic Documents/Apps/Ticket routing/Helpdesk removed
 - [x] Theme persisted to localStorage (`ssd-theme`) — verified saving 'dark'
 - [x] README.md for the repo
 - [x] Build passes, responsive audit 8/8, all verified live in browser
