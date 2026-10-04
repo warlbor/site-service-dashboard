@@ -67,6 +67,12 @@
 - [x] Refresh button — spinner + disabled state for 1.2s
 - [x] Row "⋯" dropdowns — View SLA detail / Open tickets / Export CSV
 - [x] Side rail reworked to Site Services quick actions — New WO (wrench), Assets (box → `#/assets-inventory`), Reports (chart → `#/reports-analytics`), Settings; generic Documents/Apps/Ticket routing/Helpdesk removed
+- [x] **Work-order to-do list** behind the 🔧 New WO rail button:
+  - Modal checklist: seeded demo WOs, add form (title + site/domain/category/priority with cascading selects), done/reopen toggle, delete, "Completed" section
+  - Mock CRUD in `src/api.js` persisted to `localStorage` (`ssd-work-orders`) — swap for real `fetch` later, components unchanged
+  - Collision-proof ID generation (`nextId` = max existing suffix + 1)
+  - `scripts/verify-todo-api.mjs` smoke test — seeds, unique IDs, toggle, delete, persistence: ALL PASSING
+  - Verified in browser: open modal → add "Replace faulty keyboard — HR Office" (IT/IT Hardware) → appears as WO row → toggle done moves it to Completed
 - [x] Theme persisted to localStorage (`ssd-theme`) — verified saving 'dark'
 - [x] README.md for the repo
 - [x] Build passes, responsive audit 8/8, all verified live in browser
