@@ -4,7 +4,7 @@ import { Sparkline, EuropeMap, SiteBars, SlaBars } from './charts.jsx'
 import { useRoute } from './router.js'
 import { useAsync } from './useAsync.js'
 import { Skeleton, ErrorNote } from './async.jsx'
-import { fetchTickets, fetchSla } from './api.js'
+import { fetchTickets, fetchSla, fetchWorkOrders, createWorkOrder, setWorkOrderStatus, deleteWorkOrder } from './api.js'
 import {
   NAV_ITEMS,
   OVERVIEW_KPIS,
@@ -91,16 +91,169 @@ function TopNav({ dark, setDark, active, onNavigate }) {
 
 /* ---------- Side rail ---------- */
 
-function SideRail({ onNavigate }) {
+function SideRail({ onNavigate, onNewWO }) {
   return (
     <aside className="side-rail">
-      <button className="rail-btn" aria-label="New work order" title="New work order">{Icon.wrench()}</button>
+      <button className="rail-btn" aria-label="New work order" title="New work order" onClick={onNewWO}>{Icon.wrench()}</button>
       <button className="rail-btn" aria-label="Assets & Inventory" title="Assets & Inventory" onClick={() => onNavigate('Assets & Inventory')}>{Icon.box()}</button>
       <button className="rail-btn" aria-label="Reports & Analytics" title="Reports & Analytics" onClick={() => onNavigate('Reports & Analytics')}>{Icon.report()}</button>
       <button className="rail-btn" aria-label="Settings" title="Settings">{Icon.gear()}</button>
       <div className="rail-spacer" />
       <button className="rail-btn exit" aria-label="Log out">{Icon.logout()}</button>
     </aside>
+  )
+}
+
+/* ---------- Work-order to-do modal ---------- */
+
+const WO_SITES = ['Jakarta HQ', 'Cikarang Plant', 'Surabaya Office']
+const WO_DOMAINS = ['Facility', 'GA', 'IT', 'Safety']
+const WO_CATEGORIES = {
+  Facility: ['HVAC / Climate', 'Electrical', 'Plumbing', 'Elevators & Access', 'Handyman'],
+  GA: ['Fleet & Transport', 'Office Services', 'Events & Catering', 'Janitorial / GA'],
+  IT: ['IT Hardware', 'Software & Licenses', 'Network & Cloud', 'Service Desk'],
+  Safety: ['Fire & Suppression', 'Signage & Barriers', 'Training & Certification'],
+}
+const WO_PRIORITIES = ['Low', 'Medium', 'High']
+
+function TodoModal({ onClose }) {
+  const remote = useAsync(() => fetchWorkOrders(), [])
+  const [busyId, setBusyId] = useState(null)
+  const [showForm, setShowForm] = useState(false)
+  const [draft, setDraft] = useState({ title: '', site: WO_SITES[0], domain: 'Facility', category: WO_CATEGORIES.Facility[0], priority: 'Medium' })
+  const [saving, setSaving] = useState(false)
+
+  const rows = remote.data ?? []
+  const open = rows.filter((w) => w.status === 'open')
+  const done = rows.filter((w) => w.status === 'done')
+
+  const submit = async (e) => {
+    e.preventDefault()
+    if (!draft.title.trim() || saving) return
+    setSaving(true)
+    try {
+      await createWorkOrder({ ...draft, title: draft.title.trim() })
+      setShowForm(false)
+      setDraft((d) => ({ ...d, title: '' }))
+      remote.retry()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const toggle = async (wo) => {
+    setBusyId(wo.id)
+    try {
+      await setWorkOrderStatus(wo.id, wo.status === 'open' ? 'done' : 'open')
+      remote.retry()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const remove = async (wo) => {
+    setBusyId(wo.id)
+    try {
+      await deleteWorkOrder(wo.id)
+      remote.retry()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const setDomain = (domain) => setDraft((d) => ({ ...d, domain, category: WO_CATEGORIES[domain][0] }))
+
+  return (
+    <div className="search-overlay" onClick={onClose}>
+      <div className="todo-box" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Work order to-do list">
+        <div className="todo-head">
+          <span className="todo-title">Work Orders — To Do</span>
+          <div className="todo-head-actions">
+            <button className="todo-add" onClick={() => setShowForm((v) => !v)}>{showForm ? 'Cancel' : '+ New'}</button>
+            <button className="search-close" aria-label="Close" onClick={onClose}>{Icon.close(14)}</button>
+          </div>
+        </div>
+
+        {showForm && (
+          <form className="todo-form" onSubmit={submit}>
+            <input
+              className="todo-input"
+              placeholder="What needs to be done?"
+              value={draft.title}
+              autoFocus
+              onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+            />
+            <div className="todo-form-row">
+              <select value={draft.site} onChange={(e) => setDraft((d) => ({ ...d, site: e.target.value }))}>
+                {WO_SITES.map((s) => <option key={s}>{s}</option>)}
+              </select>
+              <select value={draft.domain} onChange={(e) => setDomain(e.target.value)}>
+                {WO_DOMAINS.map((d) => <option key={d}>{d}</option>)}
+              </select>
+              <select value={draft.category} onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value }))}>
+                {WO_CATEGORIES[draft.domain].map((c) => <option key={c}>{c}</option>)}
+              </select>
+              <select value={draft.priority} onChange={(e) => setDraft((d) => ({ ...d, priority: e.target.value }))}>
+                {WO_PRIORITIES.map((p) => <option key={p}>{p}</option>)}
+              </select>
+              <button className="todo-submit" disabled={saving || !draft.title.trim()}>
+                {saving ? 'Saving…' : 'Add'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="todo-list">
+          {remote.loading && <Skeleton rows={4} />}
+          {remote.error && <ErrorNote error={remote.error} onRetry={remote.retry} />}
+          {!remote.loading && !remote.error && (
+            <>
+              {open.length === 0 && done.length === 0 && <div className="search-empty">No work orders yet — add one above.</div>}
+              {open.map((wo) => (
+                <TodoRow key={wo.id} wo={wo} busy={busyId === wo.id} onToggle={toggle} onDelete={remove} />
+              ))}
+              {done.length > 0 && (
+                <div className="todo-done-label">Completed · {done.length}</div>
+              )}
+              {done.map((wo) => (
+                <TodoRow key={wo.id} wo={wo} busy={busyId === wo.id} onToggle={toggle} onDelete={remove} />
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TodoRow({ wo, busy, onToggle, onDelete }) {
+  const isDone = wo.status === 'done'
+  return (
+    <div className={`todo-row${isDone ? ' done' : ''}`}>
+      <button
+        className="todo-check"
+        aria-label={isDone ? `Reopen ${wo.id}` : `Mark ${wo.id} done`}
+        disabled={busy}
+        onClick={() => onToggle(wo)}
+      >
+        {isDone ? '✓' : ''}
+      </button>
+      <div className="todo-main">
+        <div className="todo-text">{wo.title}</div>
+        <div className="todo-meta">
+          <span className="todo-id">{wo.id}</span>
+          <span>{wo.site}</span>
+          <span>·</span>
+          <span>{wo.domain}</span>
+          <span>·</span>
+          <span>{wo.category}</span>
+          <span className={`todo-prio p-${wo.priority.toLowerCase()}`}>{wo.priority}</span>
+        </div>
+      </div>
+      <button className="todo-del" aria-label={`Delete ${wo.id}`} disabled={busy} onClick={() => onDelete(wo)}>
+        {Icon.close(12)}
+      </button>
+    </div>
   )
 }
 
@@ -474,6 +627,8 @@ export default function App() {
     setTimeout(() => setRefreshing(false), 1200)
   }
 
+  const [todoOpen, setTodoOpen] = useState(false)
+
   const isDashboard = page === 'Dashboard'
   const title = isDashboard ? 'Site Service Dashboard' : page
 
@@ -483,7 +638,7 @@ export default function App() {
         <TopNav dark={dark} setDark={setDark} active={page} onNavigate={navigate} />
         <TitleRow title={title} onNavigate={navigate} onRefresh={refresh} refreshing={refreshing} />
         <div className="dash-grid">
-          <SideRail onNavigate={navigate} />
+          <SideRail onNavigate={navigate} onNewWO={() => setTodoOpen(true)} />
           <main className="main-col">
             {isDashboard ? (
               <>
@@ -508,6 +663,7 @@ export default function App() {
             )}
           </main>
         </div>
+        {todoOpen && <TodoModal onClose={() => setTodoOpen(false)} />}
       </div>
     </div>
   )
