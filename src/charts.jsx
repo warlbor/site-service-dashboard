@@ -1,4 +1,4 @@
-// Lightweight SVG charts — sparklines, pin map, mini bars, invoice bars.
+// Lightweight SVG charts — sparklines, pin map, mini bars, SLA bars.
 
 const W = 300
 const H = 90
@@ -27,21 +27,25 @@ export function Sparkline({ points, color }) {
   )
 }
 
-// Simplified western-Europe silhouette map with two heat glows + pins.
+// Stylized Indonesia archipelago with heat cluster over Jakarta & pins.
 const MAP_W = 640
 const MAP_H = 400
 
 const PINS = [
-  { x: 300, y: 178, r: 7 },
-  { x: 322, y: 158, r: 9 },
-  { x: 345, y: 170, r: 6 },
-  { x: 335, y: 192, r: 10 },
-  { x: 360, y: 150, r: 7 },
-  { x: 318, y: 205, r: 6 },
-  { x: 355, y: 198, r: 8 },
-  { x: 372, y: 176, r: 6 },
-  { x: 340, y: 140, r: 5 },
-  { x: 300, y: 210, r: 5 },
+  // Jakarta cluster (west Java)
+  { x: 268, y: 262, r: 10 },
+  { x: 256, y: 250, r: 7 },
+  { x: 280, y: 250, r: 8 },
+  { x: 274, y: 274, r: 6 },
+  { x: 260, y: 268, r: 6 },
+  { x: 288, y: 262, r: 7 },
+  { x: 248, y: 258, r: 5 },
+  // Cikarang / Bandung area
+  { x: 292, y: 276, r: 6 },
+  { x: 300, y: 268, r: 5 },
+  // Surabaya (east Java)
+  { x: 356, y: 270, r: 7 },
+  { x: 366, y: 262, r: 5 },
 ]
 
 function Pin({ x, y, r }) {
@@ -70,23 +74,31 @@ export function EuropeMap() {
         </radialGradient>
       </defs>
 
-      {/* base landmass blobs */}
+      {/* base landmass: Sumatra, Kalimantan, Sulawesi, Papua (outer tone) */}
       <g fill="#c9c7c4">
-        <path d="M60,140 Q120,90 200,110 Q260,90 320,110 Q300,170 250,190 Q180,210 130,190 Q80,175 60,140 Z" />
-        <path d="M250,180 Q320,150 400,160 Q470,150 540,180 Q560,230 520,270 Q450,310 380,290 Q300,280 260,240 Z" />
-        <path d="M420,90 Q500,70 570,100 Q590,140 560,170 Q480,190 430,160 Q410,120 420,90 Z" />
-        <path d="M90,240 Q150,220 210,240 Q230,280 190,310 Q130,330 90,300 Q70,270 90,240 Z" />
-      </g>
-      {/* lighter country overlay shapes */}
-      <g fill="#dedcd9" stroke="#ffffff" strokeWidth="2">
-        <path d="M100,150 Q160,105 235,122 Q285,108 330,126 Q315,175 265,196 Q195,214 145,196 Q110,180 100,150 Z" />
-        <path d="M262,190 Q330,162 405,172 Q468,164 528,190 Q545,235 508,272 Q442,305 378,288 Q305,278 270,242 Z" />
-        <path d="M432,100 Q505,82 562,108 Q578,142 552,168 Q478,186 438,160 Q422,128 432,100 Z" />
+        {/* Sumatra */}
+        <path d="M60,60 Q110,90 150,140 Q185,185 205,235 Q212,258 195,262 Q160,250 120,200 Q80,150 55,95 Q45,65 60,60 Z" />
+        {/* Kalimantan */}
+        <path d="M250,60 Q320,40 380,70 Q430,100 425,155 Q415,205 360,220 Q300,228 262,190 Q235,140 240,95 Z" />
+        {/* Sulawesi */}
+        <path d="M470,80 Q500,95 512,140 Q525,180 515,215 Q508,240 492,236 Q478,225 472,185 Q462,130 462,98 Z" />
+        {/* Papua hint */}
+        <path d="M560,150 Q600,140 628,165 Q636,190 615,205 Q580,215 560,195 Q548,170 560,150 Z" />
       </g>
 
-      {/* heat glows over France & Germany */}
-      <circle cx="300" cy="185" r="90" fill="url(#heat)" />
-      <circle cx="352" cy="168" r="75" fill="url(#heat)" />
+      {/* lighter overlay islands with white borders: Java chain + inner tones */}
+      <g fill="#dedcd9" stroke="#ffffff" strokeWidth="2">
+        {/* Java: Banten-Jakarta-West → Central → East */}
+        <path d="M205,268 Q240,252 285,258 Q330,258 372,266 Q400,270 398,282 Q394,294 360,292 Q310,290 268,286 Q228,284 206,282 Q196,274 205,268 Z" />
+        {/* Bali + Lombok nubs */}
+        <path d="M404,272 Q424,270 434,278 Q432,288 416,288 Q404,284 404,272 Z" />
+        {/* Madura */}
+        <path d="M378,252 Q400,248 412,254 Q410,262 394,262 Q382,260 378,252 Z" />
+      </g>
+
+      {/* heat glow over Jakarta / west Java */}
+      <circle cx="272" cy="266" r="78" fill="url(#heat)" />
+      <circle cx="300" cy="272" r="52" fill="url(#heat)" />
 
       {/* pins */}
       {PINS.map((p, i) => (
@@ -111,24 +123,27 @@ export function SiteBars({ bars }) {
   )
 }
 
-// Invoice / discount bars with red caps + annotation line
+// SLA compliance trend bars (%) with red caps + annotation line
 const CW = 460
 const CH = 220
 const PADL = 44
 const PADB = 26
-const YMAX = 300
 
-export function InvoiceBars({ labels, values, annotation }) {
+export function SlaBars({ labels, values, annotation, ymin = 80, ymax = 100 }) {
   const iw = CW - PADL - 10
   const ih = CH - PADB - 12
   const bw = iw / labels.length
-  const y = (v) => 12 + ih - (v / YMAX) * ih
+  const y = (v) => 12 + ih - ((v - ymin) / (ymax - ymin)) * ih
 
-  const annIdx = annotation.index ?? labels.indexOf(annotation.month)
+  const annIdx = annotation.index ?? 0
   const ax = PADL + annIdx * bw + bw / 2
 
   // zig-zag annotation line between bar tops
   const linePts = values.map((v, i) => `${PADL + i * bw + bw / 2},${y(v) - 14}`).join(' ')
+
+  // gridlines at nice % steps within [ymin, ymax]
+  const step = (ymax - ymin) / 4
+  const gridVals = [0, 1, 2, 3, 4].map((i) => ymin + i * step)
 
   return (
     <svg viewBox={`0 0 ${CW} ${CH}`} className="bars-svg">
@@ -140,11 +155,11 @@ export function InvoiceBars({ labels, values, annotation }) {
       </defs>
 
       {/* gridlines + y labels */}
-      {[0, 100, 200, 300].map((v) => (
+      {gridVals.map((v) => (
         <g key={v}>
           <line x1={PADL} x2={CW - 8} y1={y(v)} y2={y(v)} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
           <text x={PADL - 8} y={y(v) + 3.5} textAnchor="end" fontSize="9" fill="#9b979a">
-            {v === 0 ? '$0M' : `$${v}M`}
+            {v.toFixed(0)}%
           </text>
         </g>
       ))}

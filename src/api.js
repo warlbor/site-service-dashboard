@@ -6,7 +6,7 @@
 
 import {
   TICKETS_BY_PERIOD,
-  INVOICE_BY_PERIOD,
+  SLA_BY_PERIOD,
   DOMAIN_PAGES,
 } from './data.js'
 
@@ -21,10 +21,10 @@ export async function fetchTickets(period) {
   return rows
 }
 
-// GET /api/invoice?period=Yearly
-export async function fetchInvoice(period) {
+// GET /api/sla?period=Yearly
+export async function fetchSla(period) {
   await delay()
-  const data = INVOICE_BY_PERIOD[period]
+  const data = SLA_BY_PERIOD[period]
   if (!data) throw new Error(`Unknown period: ${period}`)
   return data
 }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Icon, BrandGlyph } from './icons.jsx'
-import { Sparkline, EuropeMap, SiteBars, InvoiceBars } from './charts.jsx'
+import { Sparkline, EuropeMap, SiteBars, SlaBars } from './charts.jsx'
 import { useRoute } from './router.js'
 import { useAsync } from './useAsync.js'
 import { Skeleton, ErrorNote } from './async.jsx'
-import { fetchTickets, fetchInvoice } from './api.js'
+import { fetchTickets, fetchSla } from './api.js'
 import {
   NAV_ITEMS,
   OVERVIEW_KPIS,
@@ -13,8 +13,8 @@ import {
   KEY_SITES,
   TABLE_PERIODS,
   TICKETS_BY_PERIOD,
-  INVOICE_PERIODS,
-  INVOICE_BY_PERIOD,
+  SLA_PERIODS,
+  SLA_BY_PERIOD,
   PROMO,
   DOMAIN_PAGES,
 } from './data.js'
@@ -235,7 +235,7 @@ const HUE_COLORS = { red: '#e05252', amber: '#e0a352', green: '#35c27a' }
 // "⋯" action menu for a table row
 function RowMenu({ category }) {
   const [open, setOpen] = useState(false)
-  const actions = ['View suppliers', 'Open tickets', 'Export CSV']
+  const actions = ['View SLA detail', 'Open tickets', 'Export CSV']
   return (
     <div className="row-menu-wrap">
       <button className="row-menu" aria-label={`More actions for ${category}`} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
@@ -293,10 +293,10 @@ function CategoryPanel({ rowsSource }) {
 
   const cols = [
     ['category', 'Category'],
-    ['spend', 'Spend'],
-    ['transactions', 'Transactions'],
-    ['suppliers', 'Suppliers'],
-    ['days', 'Proc. Cycle (avg.)'],
+    ['volume', 'Volume'],
+    ['sla', 'SLA %'],
+    ['responseH', 'First Response'],
+    ['resolveH', 'Resolution'],
   ]
 
   return (
@@ -334,15 +334,15 @@ function CategoryPanel({ rowsSource }) {
               {rows.map((r) => (
                 <tr key={r.category}>
                   <td>{r.category}</td>
-                  <td className="td-num">{r.spend}</td>
-                  <td className="td-num">{r.transactions}</td>
+                  <td className="td-num">{r.volume}</td>
                   <td className="td-num">
-                    {r.suppliers} <span className="td-pct">{r.pct}</span>
+                    {r.sla} <span className="td-pct">{r.resolveH}</span>
                   </td>
+                  <td className="td-num">{r.responseH}</td>
                   <td>
                     <div className="cycle">
                       <Gauge hue={r.gauge.hue} pos={r.gauge.pos} />
-                      <span className="cycle-days">{r.days}</span>
+                      <span className="cycle-days">{r.techs} techs</span>
                     </div>
                   </td>
                   <td>
@@ -362,7 +362,7 @@ function CategoryPanel({ rowsSource }) {
 
 // Simple horizontal bar visualization used when the panel is in chart mode.
 function CategoryChart({ rows }) {
-  const max = Math.max(...rows.map((r) => r.transactions))
+  const max = Math.max(...rows.map((r) => r.volume))
   return (
     <div className="cat-chart">
       {rows.map((r) => (
@@ -371,29 +371,29 @@ function CategoryChart({ rows }) {
           <div className="cat-chart-track">
             <div
               className="cat-chart-fill"
-              style={{ width: `${(r.transactions / max) * 100}%` }}
+              style={{ width: `${(r.volume / max) * 100}%` }}
             />
           </div>
-          <span className="cat-chart-num">{r.transactions}</span>
+          <span className="cat-chart-num">{r.volume}</span>
         </div>
       ))}
     </div>
   )
 }
 
-function InvoicePanel() {
+function SlaPanel() {
   const [period, setPeriod] = useState('Yearly')
   const remote = useAsync(
-    useCallback(() => fetchInvoice(period), [period]),
+    useCallback(() => fetchSla(period), [period]),
     [period],
   )
-  const data = remote.data ?? INVOICE_BY_PERIOD[period]
+  const data = remote.data ?? SLA_BY_PERIOD[period]
   return (
     <div className="tile">
       <div className="panel-head">
-        <span className="panel-title">Total Invoice, Discount %</span>
+        <span className="panel-title">SLA Compliance %</span>
         <div className="seg-group">
-          {INVOICE_PERIODS.map((p) => (
+          {SLA_PERIODS.map((p) => (
             <button key={p} className={`seg-btn${period === p ? ' on' : ''}`} onClick={() => setPeriod(p)}>{p}</button>
           ))}
         </div>
@@ -404,7 +404,7 @@ function InvoicePanel() {
         <ErrorNote error={remote.error} onRetry={remote.retry} />
       ) : (
         <div className="chart-wrap">
-          <InvoiceBars {...data} />
+          <SlaBars {...data} />
         </div>
       )}
     </div>
@@ -447,7 +447,7 @@ function DomainPage({ name }) {
       <section className="band2">
         <CategoryPanel rowsSource={page.rows} />
         <div>
-          <InvoicePanel />
+          <SlaPanel />
           <Promo />
         </div>
       </section>
@@ -499,7 +499,7 @@ export default function App() {
                 <section className="band2">
                   <CategoryPanel />
                   <div>
-                    <InvoicePanel />
+                    <SlaPanel />
                     <Promo />
                   </div>
                 </section>

@@ -22,11 +22,11 @@
 ### 3. Implementation
 - [x] `src/data.js` — single source of truth for every label/number (Facility/GA/IT/Safety)
 - [x] `src/icons.jsx` — 18 inline SVG icons + Quantix brand glyph
-- [x] `src/charts.jsx` — Sparkline, EuropeMap (heat glows + pins), SiteBars, InvoiceBars
+- [x] `src/charts.jsx` — Sparkline, IndonesiaMap (heat glows + pins), SiteBars, SlaBars
 - [x] Top nav with active pill (coral), theme toggle, bell, avatar
 - [x] Left icon rail (Documents, Apps, Ticket Routing, Helpdesk, Settings, Logout)
 - [x] Band 1: Overview KPIs · WO/TR sparkline tiles · EU map with tooltips · Key Sites bars
-- [x] Band 2: Tickets by Category table (sortable) + Total Invoice/Discount % bar chart
+- [x] Band 2: Tickets by Category table (sortable) + SLA Compliance % bar chart
 - [x] Promo banner ("Get Pro")
 - [x] Light/dark mode toggle (body class + CSS variables)
 - [x] Production build passes (`npm run build` — 0 errors)
@@ -65,7 +65,7 @@
 - [x] Mobile hamburger menu (≤720px) — opens overlay, navigates + closes, aria-expanded
 - [x] Search overlay — live filtering, Esc/backdrop/✕ to close, jumps to page (verified: "repo" → Reports & Analytics)
 - [x] Refresh button — spinner + disabled state for 1.2s
-- [x] Row "⋯" dropdowns — View suppliers / Open tickets / Export CSV
+- [x] Row "⋯" dropdowns — View SLA detail / Open tickets / Export CSV
 - [x] Theme persisted to localStorage (`ssd-theme`) — verified saving 'dark'
 - [x] README.md for the repo
 - [x] Build passes, responsive audit 8/8, all verified live in browser
@@ -73,7 +73,14 @@
 ### 6. Data & Routing — DONE
 - [x] Mock API layer (`src/api.js`) — `fetchTickets` / `fetchInvoice` / `fetchDomainPage` with simulated latency; components consume via `useAsync` hook + shimmer `Skeleton` + `ErrorNote` retry UI. To go real: swap function bodies for `fetch('/api/...')` — components unchanged.
 - [x] URL routing (`src/router.js`) — hash-based (`#/dashboard`, `#/safety`, `#/ga`, …): deep links, back/forward buttons, shareable URLs. Verified: nav click updates hash, `history.back()` returns to previous page, direct `#/safety` load renders Safety.
-- [x] Verified live: Weekly toggle fetched new dataset through API ($381,760 · 238 transactions)
+- [x] Verified live: Weekly toggle fetched new dataset through API
+- [x] **Data model v2 — fully operational, zero financial metrics:**
+  - Tickets table: Spend/Transactions/Suppliers/Proc. Cycle → **Volume / SLA % / First Response / Resolution / Techs** (gauge now = SLA health)
+  - Invoice chart → **SLA Compliance % trend** (y-axis 80–100%, period-aware, annotation = best month 98.6%)
+  - Europe map → **Indonesia archipelago** (Sumatra/Kalimantan/Sulawesi/Java/Papua), heat glow over Jakarta cluster
+  - Key Sites: Jakarta HQ · Cikarang Plant · Surabaya Office · Others
+  - Domain pages given real operational KPIs (Facility: PM Compliance, GA: Vendor SLA, IT: Avg. Resolution, Safety: Lost-Time Incidents = 0, Assets: SKUs/Low stock, Reports: WOs YTD)
+  - Row menu: "View suppliers" → "View SLA detail"
 - [ ] Optional future: toast notifications
 
 ### 7. Release — DONE
