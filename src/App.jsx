@@ -5,6 +5,7 @@ import { useRoute } from './router.js'
 import { useAsync } from './useAsync.js'
 import { Skeleton, ErrorNote } from './async.jsx'
 import { fetchTickets, fetchSla, fetchWorkOrders, createWorkOrder, setWorkOrderStatus, deleteWorkOrder } from './api.js'
+import SystemHealthMonitor from './SystemHealthMonitor.jsx'
 import {
   NAV_ITEMS,
   OVERVIEW_KPIS,
@@ -650,6 +651,7 @@ export default function App() {
       <div className="app-card">
         <TopNav dark={dark} setDark={setDark} active={page} onNavigate={navigate} />
         <TitleRow title={title} onNavigate={navigate} onRefresh={refresh} refreshing={refreshing} />
+        <SystemHealthMonitor />
         <div className="dash-grid">
           <SideRail onNavigate={navigate} onNewWO={() => setTodoOpen(true)} />
           <main className="main-col">

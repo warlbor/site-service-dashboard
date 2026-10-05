@@ -442,3 +442,69 @@ body.dark .rail-btn:hover { background: #3d393b; }
 
 /* Focus visibility */
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============ System health monitor ============ */
+
+.health-monitor {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 14px 0;
+  z-index: 10;
+}
+
+.health-indicator {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  cursor: help;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.indicator-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.health-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  min-width: 260px;
+  z-index: 50;
+  animation: menuIn 0.2s ease-out;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.health-tooltip h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tooltip-metric {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.tooltip-metric span:first-child { font-weight: 500; }
+.tooltip-metric span:last-child { font-weight: 700; color: var(--ink); }
+
+body.dark .health-indicator { background: var(--card); }
+body.dark .health-tooltip { background: var(--card); border-color: var(--card-edge); }
